@@ -1,0 +1,16 @@
+# HTTP client
+
+### Liveness check
+GET http://localhost:3000/liveness-check
+
+
+### Auth creation
+POST http://localhost:3000/auth/sign-up
+Content-Type: application/json
+
+{
+    "firstName": "daniel",
+    "lastName": "Samson",
+    "email": "dan1.samson@gmail.com",
+    "password": "DannyPass1234$"
+}
