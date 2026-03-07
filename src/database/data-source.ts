@@ -4,8 +4,8 @@ import { envConstants } from "../core/constants/eve-constants";
 
 export const AppDataSource = new DataSource({
     type: "postgres",
-    host: "localhost",
-    port: 5432,
+    host: envConstants.DATABASE_HOST,
+    port: envConstants.DATABASE_PORT,
     username: envConstants.DATABASE_USERNAME,
     password: envConstants.DATABASE_PASSWORD,
     database: envConstants.DATABASE_NAME,

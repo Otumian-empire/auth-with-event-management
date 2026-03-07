@@ -5,8 +5,11 @@ import authRouter from "./auth";
 import { ErrorHandler } from "./core/handlers/error-handler";
 import { subscriber } from "./core/redis-pub-sub";
 import { AppDataSource } from "./database";
+import { envConstants } from "./core/constants/eve-constants";
 
 const app = express();
+
+const port = envConstants.PORT;
 
 app.use(express.urlencoded({ extended: false }));
 app.use(express.json());
@@ -28,21 +31,13 @@ AppDataSource.initialize()
             console.log("Database connected...");
             subscriber()
                 .then(() =>
-                    app.listen(3000, () =>
-                        console.log("APP running on port 3000")
+                    app.listen(port, () =>
+                        console.log(`APP running on port: ${port}`)
                     )
                 )
                 .catch((error) => {
                     console.log("Could initiate pub-sub subscription - ");
-                    console.log(
-                        JSON.stringify(
-                            error,
-                            Object.getOwnPropertyNames(error),
-                            4
-                        )
-                    );
-
-                    process.exit(1);
+                    console.error(error.stack);
                 });
         } else {
             console.log(
@@ -52,9 +47,6 @@ AppDataSource.initialize()
         }
     })
     .catch((error) => {
-        console.log(
-            JSON.stringify(error, Object.getOwnPropertyNames(error), 4)
-        );
-
-        process.exit(1);
+        console.log("Database connection error");
+        console.error(error.stack);
     });

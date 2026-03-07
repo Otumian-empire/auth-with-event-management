@@ -22,4 +22,7 @@ export const envConstants = {
     // notifications
     NOTIFICATION_URL: process.env?.NOTIFICATION_URL ?? "",
     NOTIFICATION_EMAIL: process.env?.NOTIFICATION_EMAIL ?? "",
+
+    // app
+    PORT: Number(process.env?.PORT ?? 3000),
 };
