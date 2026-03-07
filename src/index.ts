@@ -3,7 +3,7 @@ import "reflect-metadata";
 import express from "express";
 import authRouter from "./auth";
 import { ErrorHandler } from "./core/handlers/error-handler";
-import { subscriber } from "./core/redis-pub-sub";
+import { EventOtuBoxRelayWorker, subscriber } from "./core/redis-pub-sub";
 import { AppDataSource } from "./database";
 import { envConstants } from "./core/constants/eve-constants";
 
@@ -30,11 +30,18 @@ AppDataSource.initialize()
         if (connection.isInitialized) {
             console.log("Database connected...");
             subscriber()
-                .then(() =>
-                    app.listen(port, () =>
-                        console.log(`APP running on port: ${port}`)
-                    )
-                )
+                .then(() => {
+                    EventOtuBoxRelayWorker(connection.manager).catch(
+                        (error) => {
+                            console.log("Could initiate event pooling - ");
+                            console.error(error.stack);
+                        }
+                    );
+
+                    app.listen(port, () => {
+                        console.log(`APP running on port: ${port}`);
+                    });
+                })
                 .catch((error) => {
                     console.log("Could initiate pub-sub subscription - ");
                     console.error(error.stack);
