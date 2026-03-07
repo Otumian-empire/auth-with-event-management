@@ -1,0 +1,4 @@
+export enum NotificationChannels {
+    SEND_SIGN_UP_SUCCESS_EMAIL = "SEND_SIGN_UP_SUCCESS_EMAIL",
+    SEND_ERROR_LOGS = "SEND_ERROR_LOGS",
+}

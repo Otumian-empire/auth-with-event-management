@@ -1,10 +1,8 @@
+import { entityManager, EventOutBox } from "../../database";
+import { NotificationChannels } from "../constants";
 import { envConstants } from "../constants/eve-constants";
 import { CreateUserSuccessfulEmailPayload } from "../interfaces";
-import {
-    NotificationChannels,
-    NotificationMessages,
-    sendNotification,
-} from "../notifications";
+import { NotificationMessages, sendNotification } from "../notifications";
 import { EstablishRedisConnection } from "./services";
 
 export async function subscriber() {
@@ -22,10 +20,20 @@ export async function subscriber() {
                 payload
             ) as CreateUserSuccessfulEmailPayload;
 
-            const message =
-                NotificationMessages.sendAccountCreatedSuccessfully(_payload);
+            const event = await entityManager.findOne(EventOutBox, {
+                where: {
+                    uuid: _payload.eventIdentifier,
+                },
+            });
 
-            await sendNotification(message);
+            if (event && !event.processed) {
+                const message =
+                    NotificationMessages.sendAccountCreatedSuccessfully(
+                        _payload
+                    );
+
+                await sendNotification(message);
+            }
         }
     );
 

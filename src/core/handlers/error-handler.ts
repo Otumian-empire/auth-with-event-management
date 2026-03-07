@@ -1,6 +1,5 @@
 import { NextFunction, Request, Response } from "express";
-import { appConstants } from "../constants";
-import { NotificationChannels } from "../notifications";
+import { appConstants, NotificationChannels } from "../constants";
 import { publisher } from "../redis-pub-sub";
 import { AppError } from "./app-error";
 

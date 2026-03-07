@@ -1,5 +1,4 @@
-import { envConstants } from "../constants/eve-constants";
-import { NotificationChannels } from "../notifications/interfaces";
+import { NotificationChannels, envConstants } from "../constants";
 import { EstablishRedisConnection } from "./services";
 
 export async function publisher<T>(channel: NotificationChannels, payload: T) {
