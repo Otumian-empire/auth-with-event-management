@@ -16,3 +16,5 @@ export const AppDataSource = new DataSource({
     subscribers: [],
     migrationsTableName: "customMigrationTable",
 });
+
+export const entityManager = AppDataSource.manager;
