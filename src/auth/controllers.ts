@@ -21,23 +21,10 @@ export async function CreateAccount(
             password,
         });
 
-        const token = AuthService.generateAuthenticationToken(user.userId);
-
-        res.status(appConstants.STATUS_CODE.SUCCESS).json({
+        return res.status(appConstants.STATUS_CODE.SUCCESS).json({
             success: true,
-            data: {
-                token,
-                ...user,
-            },
+            data: user,
         });
-
-        AuthService.emitSendSuccessSignUpEmail({
-            email,
-            firstName,
-            lastName,
-        });
-
-        return;
     } catch (error) {
         return next(error);
     }

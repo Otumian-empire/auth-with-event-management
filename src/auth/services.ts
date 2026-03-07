@@ -1,9 +1,9 @@
+import { EntityManager } from "typeorm";
+import { NotificationChannels } from "../core/constants";
 import { CreateUserSuccessfulEmailPayload } from "../core/interfaces";
 import { JWTService } from "../core/jwt";
-import { NotificationChannels } from "../core/notifications/interfaces";
 import { PasswordService } from "../core/password";
-import { publisher } from "../core/redis-pub-sub";
-import { User } from "../database";
+import { EventOutBox, User } from "../database";
 import { CreateUserDto } from "./interfaces";
 
 export class AuthService {
@@ -16,29 +16,67 @@ export class AuthService {
     }
 
     static async createUser(payload: CreateUserDto) {
-        const { email, firstName, lastName, password } = payload;
+        const entityManager = User.getRepository().manager;
 
-        const passwordHash = PasswordService.hash(password);
+        return await entityManager.transaction(async (manager) => {
+            const { email, firstName, lastName, password } = payload;
 
-        const user = await User.save(
-            User.create({
+            const passwordHash = PasswordService.hash(password);
+
+            const user = await AuthService._createUser(manager, {
+                email,
                 firstName,
                 lastName,
-                email,
                 password: passwordHash,
-            })
-        );
+            });
 
-        return { userId: user.uuid, email, firstName, lastName };
+            const event = await AuthService._createEvent(manager, {
+                email,
+                firstName,
+                lastName,
+            });
+
+            const token = AuthService.generateAuthenticationToken(user.uuid);
+
+            return { userId: user.uuid, email, firstName, lastName, token };
+        });
     }
 
-    static generateAuthenticationToken(userId: string) {
+    private static generateAuthenticationToken(userId: string) {
         return JWTService.generateToken(userId);
     }
 
-    static async emitSendSuccessSignUpEmail(
+    private static async _createUser(
+        manager: EntityManager,
+        payload: CreateUserDto
+    ) {
+        const { email, firstName, lastName, password } = payload;
+
+        const userObject = manager.create(User, {
+            firstName,
+            lastName,
+            email,
+            password,
+        });
+
+        return await manager.save(User, userObject);
+    }
+
+    private static async _createEvent(
+        manager: EntityManager,
         payload: CreateUserSuccessfulEmailPayload
     ) {
-        publisher(NotificationChannels.SEND_SIGN_UP_SUCCESS_EMAIL, payload);
+        const { email, firstName, lastName } = payload;
+
+        const eventObject = manager.create(EventOutBox, {
+            type: NotificationChannels.SEND_SIGN_UP_SUCCESS_EMAIL,
+            payload: {
+                email,
+                firstName,
+                lastName,
+            },
+        });
+
+        return await manager.save(EventOutBox, eventObject);
     }
 }
