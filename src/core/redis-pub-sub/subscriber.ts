@@ -6,9 +6,8 @@ import { NotificationMessages, sendNotification } from "../notifications";
 import { EstablishRedisConnection } from "./services";
 
 export async function subscriber() {
-    const connection = await EstablishRedisConnection(
-        envConstants.REDIS_URL,
-        true
+    const connection = await EstablishRedisConnection.getSubscriberClient(
+        envConstants.REDIS_URL
     );
 
     console.log("Subscriber service running...");
